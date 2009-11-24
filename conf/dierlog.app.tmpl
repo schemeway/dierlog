@@ -1,0 +1,17 @@
+{application, dierlog,
+ [{description, "Multichannel dialog application framework"},
+  {vsn, "0.1"},
+  {modules, [dierlog_app, dierlog_sup]},
+  {registered, [dierlog_app]},
+  {applications, [kernel, stdlib, sasl]},  %% <--- Add your application here
+  {mod, {dierlog_app, []}},
+  {env, [
+%% Change the configuration of your application here.
+%	 {xmpp_server, {"localhost", 5222}},             %% Uncomment line to add XMPP support
+%	 {xmpp_account, {"username", "host", "secret"}}, %% Uncomment line to add XMPP support
+	 {nugram_account, {"username", "secret"}},
+	 {yaws_port, 8080},
+	 {yaws_servername, "localhost"},
+	 {dialog_module, dialog_test}
+	]}
+ ]}.

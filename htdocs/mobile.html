@@ -1,0 +1,57 @@
+<html>
+  <head>
+    <title>Dierlog Interface</title>
+    <script src="/prototype.js"></script>
+    <script>
+
+      function start() {
+        getNextInteraction({result: 'next', value: undefined});
+        $('message').focus();
+      }
+
+      function sendMessage() {
+         var msg = $('message').getValue();
+         if (msg == '') return;
+
+         $('message').value = "";
+         addInteraction('me', "blue", msg);
+
+         getNextInteraction({ result: 'text', value: msg });
+      }
+
+
+      function getNextInteraction(params) {
+         new Ajax.Request('/html', {
+            method: 'post',
+            parameters:  params,
+            onSuccess: function(response) {
+              var jsonResponse = response.responseText.evalJSON(true);
+
+              addInteraction('Bot', "red", jsonResponse.text);
+              if (jsonResponse.type == 'message') {
+                 getNextInteraction({ result: 'next', value: undefined });
+              }
+            }
+         });
+      }
+
+      function addInteraction(who, color, msg) {
+         var dialogDiv = $('dialog');
+         dialogDiv.innerHTML += ("<b style='color: " + color + "'>"  + who + ":</b> " + msg + "<br/>");
+         dialogDiv.scrollTop = dialogDiv.scrollHeight;
+      }
+    </script>
+
+  </head>
+
+  <body onload="start()">
+
+    <div style="width: 300px; border: 1px solid black; background-color: #DDD;">
+      <h3 align=center>Dierlog Application</h3>
+      <div id="dialog" style="height: 450; overflow: auto; font-size: 10pt; font-family: Arial; padding: 5px;">
+      </div>
+      <input style="width: 300px" type="text" id="message" 
+	     onkeydown="if (event.keyCode == 13) { sendMessage(); return false; } else { return true; }">
+    </div>
+  </body>
+</html>
