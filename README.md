@@ -15,6 +15,22 @@ production use. It does not contain all the error checking code
 required by a production-grade application._
 
 
+Dependencies
+------------
+
+The code depends on the following Erlang packages:
+
+- Yaws (http://yaws.hyber.org)
+- exmpp (http://support.process-one.net/doc/display/EXMPP/exmpp+home)
+- nugramserver-clients (http://github.com/nugramserver-clients)
+
+
+Running the application
+-----------------------
+
+	
+
+
 Contact Info
 ------------
 

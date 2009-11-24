@@ -5,7 +5,9 @@ basedir=$bindir/..
 
 ERL=/usr/bin/erl
 YAWS_EBIN=/usr/local/lib/yaws/ebin
-ERL_PATH="-pa $YAWS_EBIN pa $basedir/ebin"
+NUGRAMSERVER_EBIN=$basedir/../nugramserver-clients/bin
+
+ERL_PATH="-pa $YAWS_EBIN -pa $NUGRAMSERVER_EBIN -pa $basedir/ebin"
 
 ID=dierlog
 NODE=$ID@$(hostname -s)

@@ -1,5 +1,5 @@
 YAWS_INCLUDE=/usr/local/lib/yaws/include
-GSERVER_INCLUDE=../grammarserver-clients/erlang
+GSERVER_INCLUDE=../nugramserver-clients/erlang
 
 BEAM_DIR=ebin
 SRC_DIR=src
