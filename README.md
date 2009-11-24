@@ -1,5 +1,5 @@
-Dialog Application Framework
-============================
+A Dialog Application Framework in Erlang
+========================================
 
 This repository contains code for a simple dialog application framework written in Erlang. It can be run on the following platforms:
 
