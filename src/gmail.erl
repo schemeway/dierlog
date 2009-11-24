@@ -1,7 +1,7 @@
 %%% File    : gmail.erl
-%%% Author  : Dominique Boucher <>
-%%% Description : Sending mail via an GMail account
-%%% Created : 14 Jun 2009 by Dominique Boucher <>
+%%% Author  : Dominique Boucher
+%%% Description : Simple-minded email sending via an GMail account
+
 
 -module(gmail).
 -export([send/4]).
