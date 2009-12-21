@@ -61,26 +61,32 @@ finish() ->
 
 
 test() ->
-    dialog_sessions:start(),
+    dialog_sessions:start_link(),
     Pid = dialog_ctl:start("test", fun start_dialog/2, inbound),
+
     dialog_ctl:viewer_send(Pid, answer),
     #interaction{prompts=[#tts{text="Welcome to my demo application!"}]}
 	= receive_msg(Pid),
-    dialog_ctl:viewer_send(Pid, next),    
-    #interaction{prompts=[#tts{text="What is your postal code?"}],
+    dialog_ctl:viewer_send(Pid, next),
+
+    #interaction{prompts=[#tts{text="What is your pin?"}],
 		 grammars=["postalcode.abnf"]} 
 	= receive_msg(Pid),
     dialog_ctl:viewer_send(Pid, #event{name=nomatch}),
+
     #interaction{prompts=[#tts{text="I did not understand."},
-			  #tts{text="What is your postal code?"}],
+			  #tts{text="What is your pin?"}],
 		 grammars=["postalcode.abnf"]}
 	= receive_msg(Pid),
     dialog_ctl:viewer_send(Pid, #text{string = "123456"}),
-    #interaction{prompts=[#tts{text="Thanks, your postal code is 123456"}]}
+
+    #interaction{prompts=[#tts{text="Thanks, your pin is 123456"}]}
 	= receive_msg(Pid),
     dialog_ctl:viewer_send(Pid, ok),
+
     hangup = dialog_ctl:viewer_receive(Pid),
     dialog_sessions:stop().
+
 
 receive_msg(Pid) ->
     Msg = dialog_ctl:viewer_receive(Pid),
