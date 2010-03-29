@@ -36,6 +36,6 @@ Contact Info
 
 For any question or request, contact Dominique Boucher at <dominique.boucher@nuecho.com>. 
 
-The Nu Echo team
+Dominique Boucher
 
 
