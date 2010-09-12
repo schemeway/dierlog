@@ -42,7 +42,7 @@ render(Interaction = #interaction{}, AppUrl) ->
 	[{field, [{id, "name"}],
 	  [{prompt, [],
 	    render_prompts(Interaction#interaction.prompts)}] ++
-           render_grammars(Interaction#interaction.grammars) ++
+	  render_grammars(Interaction#interaction.grammars) ++
           [{filled, [],
             [{var, [{name, "result"}, {expr, "'nbest'"}]},
 	     {var, [{name, "hypotheses"}, {expr, "encodeHypotheses(application.lastresult$);"}]},
@@ -59,7 +59,7 @@ render(Interaction = #interaction{}, AppUrl) ->
            {'catch', [{event, "nomatch"}],
             [{var, [{name, "result"}, {expr, "'event'"}]},
              {var, [{name, "name"}, {expr, "'nomatch'"}]},
-             {submit, [{method, "POST"}, {namelist, "result"}, {next, AppUrl}]}]},
+             {submit, [{method, "POST"}, {namelist, "result name"}, {next, AppUrl}]}]},
            {'catch', [{event, "."}],
             [{var, [{name, "result"}, {expr, "'error'"}]},
              {submit, [{method, "POST"}, {namelist, "result"}, {next, AppUrl}]}]}]}]}]).
