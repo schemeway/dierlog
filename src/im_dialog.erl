@@ -34,7 +34,7 @@ get_output(Pid) ->
 msg_to_result(Message) ->
     case Message of
 	""  -> #event{name = noinput};
-	Msg -> #text{string = Msg}
+	Msg -> #nbest{values = [Msg]}
     end.
 
 
