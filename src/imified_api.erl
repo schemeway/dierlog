@@ -18,13 +18,13 @@
 %%
 
 get_users(Account = #im_account{}) ->
-    case http:request(post,
-		      {?IMIFIED_URL, 
-		       [{"Authorization", auth_string(Account)}], 
-		       "application/x-www-form-urlencoded",
-		       "apimethod=getAllUsers&botkey=" ++ Account#im_account.botkey}, 
-		      [{timeout, 5000}],
-		      []) of
+    case httpc:request(post,
+		       {?IMIFIED_URL, 
+			[{"Authorization", auth_string(Account)}], 
+			"application/x-www-form-urlencoded",
+			"apimethod=getAllUsers&botkey=" ++ Account#im_account.botkey}, 
+		       [{timeout, 5000}],
+		       []) of
 	{ok, {{_,200,_}, _Headers, Data}} ->
 	    {RootElement, _} = xmerl_scan:string(Data),
 	    RootElement;
@@ -58,15 +58,15 @@ check_availability(Account = #im_account{}, User) ->
 
 
 send_message(Account = #im_account{}, User = #im_user{}, Text) ->
-    case http:request(post,
-		      {?IMIFIED_URL, 
-		       [{"Authorization", auth_string(Account)}], 
-		       "application/x-www-form-urlencoded",
-		       "apimethod=send&botkey=" ++ Account#im_account.botkey
-		       ++ "&userkey=" ++ User#im_user.key
-		       ++ "&msg=" ++ yaws_api:url_encode(Text)}, 
-		      [{timeout, 5000}],
-		      []) of
+    case httpc:request(post,
+		       {?IMIFIED_URL, 
+			[{"Authorization", auth_string(Account)}], 
+			"application/x-www-form-urlencoded",
+			"apimethod=send&botkey=" ++ Account#im_account.botkey
+			++ "&userkey=" ++ User#im_user.key
+			++ "&msg=" ++ yaws_api:url_encode(Text)}, 
+		       [{timeout, 5000}],
+		       []) of
 	{ok, {{_,200,_}, _Headers, _Data}} ->
 	    ok;
 	_ ->
