@@ -7,10 +7,11 @@
 
 -record(interaction, {prompts, grammars = [], options = #interaction_options{}}).
 
--record(tts,   {text}).
--record(audio, {url}).
+-record(prompt,   {audio = undefined, text = undefined}).
+
+-record(record,   {prompts = [], beep = false, maxtime = 3000, finalsilence = 3000, dtmfterm = true}).
 
 -record(dtmf,  {string}).
 -record(nbest, {values = []}).
 -record(event, {name, message = ""}).
--record(text,  {string}).
+-record(recording, {attributes = []}).

@@ -56,16 +56,15 @@ render(Interaction = #interaction{}, AppUrl) ->
 	 {input, [{type, "submit"}, {value, "nomatch"}, {onClick, "resulttype = 'event', eventname = 'nomatch'"}]},
 	 {input, [{type, "submit"}, {value, "Hangup"},  {onClick, "resulttype = 'event', eventname = 'hangup'"}]}]}]}}.
 
-
-
 render_prompts(Prompts) ->
     lists:flatten(lists:map(fun render_prompt/1, Prompts)).
 
-render_prompt(#tts{text = Text}) ->
+render_prompt(#prompt{text = undefined, audio = Src}) ->
+    {a, [{href, Src}], Src};
+render_prompt(#prompt{text = Text, audio = undefined}) ->
     Text;
-render_prompt(#audio{url = Url}) ->
-    {a, [{href, Url}], Url}.
-
+render_prompt(#prompt{text = Text, audio = Src}) ->
+    {a, [{href, Src}], Text}.
 
 render_grammars(Grammars) ->
     lists:map(fun(Grammar) ->

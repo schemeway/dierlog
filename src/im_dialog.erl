@@ -44,7 +44,7 @@ collect_prompts(Pid) ->
 collect_prompts(Pid, CollectedPrompts) ->
     case dialog_ctl:viewer_receive(Pid) of
 	hangup ->
-	    [#tts{text = "Bye."} | CollectedPrompts];
+	    [#prompt{text = "Bye."} | CollectedPrompts];
 	#interaction{prompts = Prompts, grammars = []} ->
 	    dialog_ctl:viewer_send(Pid, next),
 	    collect_prompts(Pid, Prompts ++ CollectedPrompts);
@@ -62,7 +62,7 @@ render(hangup) ->
     imified:reset("Bye.");
 render(error) ->
     imified:error("Internal error");
-render(#tts{text = Text}) ->
-    Text ++ " ";
-render(#audio{url = Url}) ->
-    Url ++ " ".
+render(#prompt{text = undefined, audio = Url}) ->
+    Url ++ " ";
+render(#prompt{text = Text}) ->
+    Text ++ " ".

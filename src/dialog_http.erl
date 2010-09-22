@@ -14,10 +14,35 @@
 
 
 out(Arg) ->
-    {Interaction, SessionId} = next_interaction(Arg, get_sessionid(Arg)),
-    View = get_view(Arg),
-    Path = Arg#arg.server_path,
-    render(Interaction, View, SessionId, Path).
+    case {Arg#arg.clidata, Arg#arg.cont, (Arg#arg.headers)#headers.content_type} of 
+	{{partial,_Data}, _, _} ->
+	    process_fileupload(Arg);
+	{_, {cont, _}, _} ->
+	    process_fileupload(Arg);
+	{_, undefined, "multipart/form-data;" ++ _} ->
+	    process_fileupload(Arg);
+	V ->
+	    {Interaction, SessionId} = next_interaction(Arg, get_sessionid(Arg)),
+	    View = get_view(Arg),
+	    Path = Arg#arg.server_path,
+	    render(Interaction, View, SessionId, Path)
+    end.
+
+process_fileupload(Arg) ->
+    case yaws_multipart:read_multipart_form(Arg, [no_temp_file]) of
+	{done, Params} ->
+	    SessionId = get_sessionid(Arg),
+	    Pid = dialog_sessions:session_process(SessionId),
+	    Result = #recording{attributes = dict:fetch("recording", Params)},
+	    dialog_ctl:viewer_send(Pid, Result),
+	    Interaction = dialog_ctl:viewer_receive(Pid),
+	    View = get_view(Arg),
+	    Path = Arg#arg.server_path,
+	    render(Interaction, View, SessionId, Path);
+	T ->
+	    T
+    end.
+    
 
 get_view(Arg) ->
     {Arg#arg.opaque, render}.
@@ -32,11 +57,20 @@ render(Interaction, View, SessionId, Path) ->
 get_sessionid(Arg) ->
     Headers = Arg#arg.headers,
     Cookies = Headers#headers.cookie,
-    yaws_api:find_cookie_val("sessionid", Cookies).
+    case yaws_api:find_cookie_val("sessionid", Cookies) of
+	[] ->
+	    new_session;
+	Id -> Id
+    end.
     
 
-next_interaction(_Arg, []) ->
-    SessionId = new_sessionid(),
+next_interaction(Arg, new_session) ->
+    case yaws_api:getvar(Arg, "session.sessionid") of
+	{ok, SessionId} ->
+	    SessionId;
+	_ ->
+	    SessionId = new_sessionid()
+    end,
     {start_dialog(SessionId), SessionId};
 next_interaction(Arg, SessionId) ->
     Pid = dialog_sessions:session_process(SessionId),
@@ -62,6 +96,8 @@ decode_result(Arg) ->
 	    decode_text_result(Arg);
 	{ok, "hangup"} ->
 	    hangup;
+	{ok, "recording"} ->
+	    recording;
 	{ok, "next"} ->
 	    next;
 	{ok, "nbest"} ->
@@ -82,7 +118,7 @@ decode_dtmf_result(Arg) ->
 decode_text_result(Arg) ->
     case yaws_api:postvar(Arg, "value") of
 	{ok, Str} ->
-	    #text{string = Str};
+	    #nbest{values = [Str]};
 	_ ->
 	    error
     end.

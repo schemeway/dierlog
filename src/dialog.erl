@@ -6,6 +6,11 @@
 -module(dialog).
 
 -export([play/1, play/2, collect/1, ask/2, ask/3, hangup/0, answer/0, nugram_session/0]).
+-export([record/2]).
+-export([language/0, set_language/1, app/0, set_app/1]).
+-export([voicefile/1, grammarfile/1]).
+
+-export([throw_on_hangup/0]).
 
 -include("dialog.hrl").
 -include("nugramserver.hrl").
@@ -18,7 +23,7 @@
 
 collect(Interaction = #interaction{}) ->
     dialog_ctl:client_send(Interaction),
-    dialog_ctl:client_receive().
+    check_hangup(dialog_ctl:client_receive()).
 
 
 play(Prompts) ->
@@ -35,6 +40,12 @@ ask(Prompts, Grammars, Options) ->
 				  grammars = Grammars,
 				  options = Options}),
     interpret_text(Result, Grammars, Options#interaction_options.interpret_text).
+
+record(Prompts, Options) ->
+    Record = parse_record_options(Options, #record{prompts = Prompts}),
+    dialog_ctl:client_send(Record),
+    check_hangup(dialog_ctl:client_receive()).
+
 
 hangup() ->
     dialog_ctl:client_send(hangup),
@@ -64,11 +75,61 @@ stop_nugram_session(_) ->
     ok.
 
 
+language() ->
+    case get({dialog, language}) of
+	undefined ->
+	    "en";
+	Lang ->
+	    Lang
+    end.
+
+set_language(Lang) ->
+    put({dialog, language}, Lang).
+
+app() ->
+    case get({dialog, app}) of
+	undefined ->
+	    "app";
+	App ->
+	    App
+    end.
+
+set_app(Name) ->
+    put({dialog, app}, Name).
+
+
+voicefile(Name) ->
+    "/" ++ app() ++ "/prompts/" ++ language() ++ "/" ++ Name.
+
+grammarfile(Name) ->
+    "/" ++ app() ++ "/grammars/" ++ language() ++ "/" ++ Name.
+
+
+throw_on_hangup() ->
+    put({dialog, throw_on_hangup}, true).
+
+check_hangup(Result) ->
+    case Result of
+	hangup ->
+	    case get({dialog, throw_on_hangup}) of
+		true ->
+		    throw(hangup);
+		_ ->
+		    hangup
+	    end;
+	Other ->
+	    Other
+    end.
+
+
+    
+
+
 %%====================================================================
 %% Internal functions
 %%====================================================================
 
-interpret_text(#text{string = Answer}, Grammars = [_ | _], true) ->
+interpret_text(#nbest{values = [Answer]}, Grammars = [_ | _], true) when is_list(Answer) ->
     NuGramSession = nugram_session(),
     Grammar = nugramserver:instantiate(NuGramSession, ?MAIN_GRAMMAR, [{grammars, Grammars}]),
     case nugramserver:interpret(Grammar, Answer) of
@@ -81,3 +142,14 @@ interpret_text(Result, _, _) ->
     Result.
 
 
+
+parse_record_options([], Rec) ->
+    Rec;
+parse_record_options([beep|Options], Rec) ->
+    parse_record_options(Options, Rec#record{beep = true});
+parse_record_options([{maxtime, Val}|Options], Rec)
+  when is_integer(Val) andalso Val >= 0 ->
+    parse_record_options(Options, Rec#record{maxtime = Val});
+parse_record_options([{finalsilence, Val}|Options], Rec)
+  when is_integer(Val) andalso Val >= 0 ->
+    parse_record_options(Options, Rec#record{finalsilence = Val}).
