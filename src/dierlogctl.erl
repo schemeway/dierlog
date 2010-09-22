@@ -59,5 +59,11 @@ process(["stop", NodeName]) ->
 	    io:format("dierlog is not running~n", [])
     end;
 
+process(["restart", NodeName]) ->
+    process(["stop", NodeName]),
+    timer:sleep(2000),
+    process(["start", NodeName]);
+
+
 process(_) ->
-    io:format("Usage: dierlog [start|status|stop]~n").
+    io:format("Usage: dierlog [start|status|stop|restart]~n").
